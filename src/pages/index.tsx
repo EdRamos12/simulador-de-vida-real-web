@@ -1,11 +1,13 @@
-import Head from 'next/head'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
-import WindowComponent from '@/context/WindowComponent'
+import Head from 'next/head';
+import { Inter } from '@next/font/google';
+import styles from '@/styles/Home.module.css';
+import { ADD, useWindowContext } from '@/window_context/WindowContextAPI';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  const { toast, toastDispatch } = useWindowContext();
+
   return (
     <>
       <Head>
@@ -16,7 +18,16 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} win7`}>
         pain and suffering
-        <WindowComponent />
+        <button onClick={() => toastDispatch({
+          type: ADD,
+          payload: {
+            type: 'custom',
+            title: 'pfvr funcione',
+            id: 'main_window',
+            children: <div>se inscrevam-se no vanal simpson gamer</div>
+          }
+        })}>nova janela</button>
+        {/* <WindowComponent /> */}
       </main>
     </>
   )
