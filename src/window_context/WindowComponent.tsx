@@ -1,24 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { REMOVE, UPDATE_POS, useWindowContext } from "./WindowContextAPI";
+import { useCallback, useEffect, useState } from "react";
+import { REMOVE, UPDATE_POS, useWindowContext, WindowComponentInterface } from "./WindowContextAPI";
 
-interface Props {
-  toastData: {
-    id: string,
-    title: string,
-    type: 'warning' | 'error' | 'info' | 'custom',
-    buttons: {
-      title: string,
-      action: any,
-    }
-    pos: {
-      x: number,
-      y: number
-    }
-  }
-  children: React.ReactNode;
-}
-
-export default function WindowComponent({ children, toastData }: Props) {
+export default function WindowComponent({ children, toastData }: {toastData: WindowComponentInterface, children: WindowComponentInterface['children']}) {
   const { toastDispatch } = useWindowContext();
   
   const [windowPosition, setWindowPosition] = useState({
