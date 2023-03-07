@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, Reducer, useContext, useReducer } from "react";
 import { createPortal } from "react-dom";
 import WindowComponent from "./WindowComponent";
 
@@ -28,42 +28,44 @@ interface Action {
   payload: WindowComponentInterface,
 }
 
-export const windowReducer = (state: WindowComponentInterface[], action: Action) => {
-  switch (action.type) {
+export const windowReducer: Reducer<Array<WindowComponentInterface>, Action> = (state, action) => {
+  const {payload, type} = action;
+  
+  switch (type) {
     case ADD:
-      if (action.payload.type === 'custom') {
+      if (payload.type === 'custom') {
         return [
           ...state,
           {
-            id: `${action.payload.id}_${Date.now()}`,
-            title: action.payload.title,
-            type: action.payload.type,
-            children: action.payload.children,
+            id: `${payload.id}_${Date.now()}`,
+            title: payload.title,
+            type: payload.type,
+            children: payload.children,
             pos: {
               x: 0,
               y: 0
             }
           }
-        ];
+        ] as Array<WindowComponentInterface>;
       }
       return [
         ...state,
         {
-          id: `${action.payload.type}_${Date.now()}`,
-          text: action.payload.text,
-          type: action.payload.type,
-          buttons: action.payload.buttons
+          id: `${payload.type}_${Date.now()}`,
+          text: payload.text,
+          type: payload.type,
+          buttons: payload.buttons
         }
-      ];
+      ] as Array<WindowComponentInterface>;;
     case REMOVE:
-      return state.filter((t: any) => t.id !== action.payload.id);
+      return state.filter((t: any) => t.id !== payload.id);
     case UPDATE_POS:
       const WindowPositionArray = state;
-      WindowPositionArray[WindowPositionArray.indexOf(WindowPositionArray.find(t => t.id === action.payload.id) as WindowComponentInterface)] = {
-        ...WindowPositionArray[WindowPositionArray.indexOf(WindowPositionArray.find(t => t.id === action.payload.id) as WindowComponentInterface)],
+      WindowPositionArray[WindowPositionArray.indexOf(WindowPositionArray.find(t => t.id === payload.id) as WindowComponentInterface)] = {
+        ...WindowPositionArray[WindowPositionArray.indexOf(WindowPositionArray.find(t => t.id === payload.id) as WindowComponentInterface)],
         pos: {
-          x: (action.payload.pos?.x || 0) - (action.payload.pos?.offsetX || 0),
-          y: (action.payload.pos?.y || 0) - (action.payload.pos?.offsetY || 0),
+          x: (payload.pos?.x || 0) - (payload.pos?.offsetX || 0),
+          y: (payload.pos?.y || 0) - (payload.pos?.offsetY || 0),
         }
       }
       return WindowPositionArray;
@@ -72,17 +74,15 @@ export const windowReducer = (state: WindowComponentInterface[], action: Action)
   }
 };
 
-export const WindowProvider = ({ children }: any) => {
-  const [toast, toastDispatch] = useReducer(windowReducer as any, []) as any;
-  const toastData = { toast, toastDispatch };
+export const WindowProvider: React.FC<any> = ({ children }) => {
+  const [state, dispatch] = useReducer(windowReducer, []);
+  const data = { state, dispatch };
 
   return (
-    <WindowContext.Provider value={toastData}>
+    <WindowContext.Provider value={data}>
       {children}
 
-      {toast.map((t: WindowComponentInterface) => createPortal(<>
-        <WindowComponent key={t.id} toastData={t} children={t.children} />        
-      </>, document.body))}
+      {state.map((t: WindowComponentInterface) => createPortal(<WindowComponent key={t.id} toastData={t} children={t.children} />, document.body))}
     </WindowContext.Provider>
   );
 };

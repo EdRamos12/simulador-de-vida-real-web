@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { REMOVE, UPDATE_POS, useWindowContext, WindowComponentInterface } from "./WindowContextAPI";
 
 export default function WindowComponent({ children, toastData }: {toastData: WindowComponentInterface, children: WindowComponentInterface['children']}) {
-  const { toastDispatch } = useWindowContext();
+  const { dispatch } = useWindowContext();
   
   const [windowPosition, setWindowPosition] = useState({
     x: toastData.pos?.x || -500,
@@ -15,7 +15,7 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
   })
 
   const updatePositionInContext = () => {
-    toastDispatch({
+    dispatch({
       type: UPDATE_POS,
       payload: {
         id: toastData.id,
@@ -96,7 +96,7 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
           marginTop: '0px',
           marginLeft: '0px',
         }}>
-          <button onClick={() => toastDispatch({
+          <button onClick={() => dispatch({
             type: REMOVE,
             payload: {
               id: toastData.id

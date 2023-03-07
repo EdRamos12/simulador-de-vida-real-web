@@ -6,7 +6,7 @@ import { ADD, useWindowContext } from '@/window_context/WindowContextAPI';
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  const { toast, toastDispatch } = useWindowContext();
+  const { toast, dispatch } = useWindowContext();
 
   return (
     <>
@@ -18,7 +18,7 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} win7`}>
         pain and suffering
-        <button onClick={() => toastDispatch({
+        <button onClick={() => dispatch({
           type: ADD,
           payload: {
             type: 'custom',

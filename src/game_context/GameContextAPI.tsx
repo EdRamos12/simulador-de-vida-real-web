@@ -23,7 +23,7 @@ export type TodoContextType = {
 export const TodoContext = createContext<TodoContextType | any>(null);
 
 const TodoProvider: React.FC = () => {
-  const { toastDispatch } = useWindowContext();
+  const { dispatch } = useWindowContext();
 
   // general settings
   const [day, setDay] = useState(1);
@@ -42,7 +42,7 @@ const TodoProvider: React.FC = () => {
   const [foodStorage, setFoodStorage] = useState(20);
 
   const triggerDeath = () => {
-    toastDispatch({
+    dispatch({
       type: 'alert',
       
     })
