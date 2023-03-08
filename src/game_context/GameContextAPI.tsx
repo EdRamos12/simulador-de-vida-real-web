@@ -1,8 +1,8 @@
-import { useWindowContext } from "@/window_context/WindowContextAPI";
-import { createContext, useEffect, useState } from "react";
-import { DEPRESSION_INIT_VALUE, ENERGY_INIT_VALUE, HUNGER_INIT_VALUE, INTELLIGENCE_INIT_VALUE, JOB_INIT_VALUE, MONEY_INIT_VALUE, STRENGTH_INIT_VALUE, THIRSTY_INIT_VALUE } from "./GameVarLimits";
+import { ADD, useWindowContext } from "@/window_context/WindowContextAPI";
+import { createContext, useContext, useState } from "react";
+import { DEPRESSION_INIT_VALUE, DEPRESSION_MAX, ENERGY_INIT_VALUE, HUNGER_INIT_VALUE, HUNGER_MAX, INTELLIGENCE_INIT_VALUE, INTELLIGENCE_MAX, JOB_INIT_VALUE, MONEY_INIT_VALUE, STRENGTH_INIT_VALUE, STRENGTH_MAX, THIRSTY_INIT_VALUE, THIRSTY_MAX } from "./GameVarLimits";
 
-export interface ITodo {
+type GameContextAPIType = {
   energy: number;
   hunger: number;
   thirsty: number;
@@ -11,18 +11,28 @@ export interface ITodo {
   intelligence: number;
   depression: number;
   job: string;
-  profile_pic: number;
+  foodStorage: number;
+  day: number;
+
+  triggerDeath: () => void;
+  decreaseEnergy: () => boolean;
+  increaseHungry: (amount?: number) => boolean | void;
+  increaseThirstiness: (amount?: number) => boolean | void;
+  increaseDepression: (amount?: number) => boolean | void;
+
+  increaseIntelligence: () => boolean;
+  decreaseDepression: () => boolean;
+  drinkWater: () => boolean;
+  sleep: () => boolean;
+  eatFood: () => boolean;
+  increaseMoney: (amount: number) => boolean;
+  decreaseMoney: (amount: number) => boolean;
+  increaseStrength: () => boolean;
 }
 
-export type TodoContextType = {
-  todos: ITodo[];
-  saveTodo: (todo: ITodo) => void;
-  updateTodo: (id: number) => void;
-};
+export const GameContextAPI = createContext<GameContextAPIType>({} as GameContextAPIType);
 
-export const TodoContext = createContext<TodoContextType | any>(null);
-
-const TodoProvider: React.FC = () => {
+export const GameAPIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { dispatch } = useWindowContext();
 
   // general settings
@@ -43,48 +53,130 @@ const TodoProvider: React.FC = () => {
 
   const triggerDeath = () => {
     dispatch({
-      type: 'alert',
-      
+      type: ADD,
+      payload: {
+        
+      }
     })
   }
 
-  useEffect(() => {
-    if (energy <= 0) triggerDeath();
-  }, [energy]);
-
-
   const decreaseEnergy = (amount = 1) => {
+    if (energy <= 0) triggerDeath();
+
     setEnergy(current => current - amount);
+    return true;
   }
 
   const increaseHungry = (amount = 1) => {
+    if (hunger >= HUNGER_MAX) return triggerDeath();
+
     setHunger(current => current + amount);
+    return true;
   }
 
   const increaseThirstiness = (amount = 1) => {
+    if (thirsty >= THIRSTY_MAX) return triggerDeath();
+
     setThirsty(current => current + amount);
+    return true;
+  }
+
+  const increaseDepression = (amount = 1) => {
+    if (depression >= DEPRESSION_MAX) return triggerDeath();
+
+    setDepression(current => current + amount);
+    return true;
   }
 
 
   const increaseIntelligence = (amount = 1) => {
-    if (intelligence === 20) return false;
+    if (intelligence >= INTELLIGENCE_MAX) return false;
 
     setIntelligence(current => current + amount);
     return true;
   }
 
+  const decreaseDepression = (amount = 1) => {
+    setDepression(current => current - amount);
+    return true;
+  }
+
   const drinkWater = (amount = 1) => {
+    if (thirsty <= THIRSTY_INIT_VALUE) return false;
+
     setThirsty(current => current - amount);
     return true;
   }
 
   const sleep = () => {
-    if (energy === 10) return false;
+    if (energy >= ENERGY_INIT_VALUE) return false;
 
-    setEnergy(10);
+    setEnergy(ENERGY_INIT_VALUE);
     setDay(current => current + 1)
     return true;
   }
 
-  return <TodoContext.Provider value={{}} />
+  const eatFood = (amount = 1) => {
+    if (hunger <= HUNGER_INIT_VALUE) return false;
+    if (foodStorage <= 0) return false;
+
+    setHunger(current => current - amount);
+    setFoodStorage(current => current - amount);
+    return true;
+  }
+
+  const increaseMoney = (amount: number) => {
+    if (money < 0) return false;
+
+    setMoney(current => current + amount);
+    return true;
+  }
+
+  const decreaseMoney = (amount: number) => {
+    if ((money - amount) < 0) return false;
+    
+    setMoney(current => current - amount);
+    return true;
+  }
+
+  const increaseStrength = (amount = 1) => {
+    if (strength >= STRENGTH_MAX) return false;
+
+    setStrength(current => current + amount);
+    return false;
+  }
+
+  return <GameContextAPI.Provider value={{
+    energy,
+    hunger,
+    thirsty,
+    strength,
+    money,
+    intelligence,
+    depression,
+    job,
+    foodStorage,
+    day,
+
+    triggerDeath,
+    decreaseEnergy,
+    increaseHungry,
+    increaseThirstiness,
+    increaseDepression,
+
+    increaseIntelligence,
+    decreaseDepression,
+    drinkWater,
+    sleep,
+    eatFood,
+    increaseMoney,
+    decreaseMoney,
+    increaseStrength,
+  }}>
+    {children}
+  </GameContextAPI.Provider>
 }
+
+export const useGameAPIContext = () => {
+  return useContext(GameContextAPI);
+};

@@ -1,17 +1,11 @@
-import { createContext, Reducer, useContext, useReducer } from "react";
+import { createContext, Dispatch, Reducer, useContext, useReducer } from "react";
 import { createPortal } from "react-dom";
 import WindowComponent from "./WindowComponent";
 
-export const WindowContext = createContext({} as any);
-
-export const ADD = 'ADD';
-export const REMOVE = 'REMOVE';
-export const UPDATE_POS = 'UPDATE_POS';
-
 export interface WindowComponentInterface {
-  id: string, 
-  title: string, 
-  type: 'custom' | string, 
+  id?: string, 
+  title?: string, 
+  type?: 'custom' | 'warning' | 'error' | 'info', 
   children?: React.ReactNode, 
   pos?: {
     x: number, 
@@ -20,13 +14,19 @@ export interface WindowComponentInterface {
     offsetY?: number
   },
   text?: string,
-  buttons?: string
+  buttons?: any
 }
 
 interface Action {
   type: 'ADD' | 'REMOVE' | 'UPDATE_POS',
   payload: WindowComponentInterface,
 }
+
+export const WindowContext = createContext<{state: Array<WindowComponentInterface>, dispatch: Dispatch<Action>}>({} as any);
+
+export const ADD = 'ADD';
+export const REMOVE = 'REMOVE';
+export const UPDATE_POS = 'UPDATE_POS';
 
 export const windowReducer: Reducer<Array<WindowComponentInterface>, Action> = (state, action) => {
   const {payload, type} = action;
@@ -74,7 +74,7 @@ export const windowReducer: Reducer<Array<WindowComponentInterface>, Action> = (
   }
 };
 
-export const WindowProvider: React.FC<any> = ({ children }) => {
+export const WindowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(windowReducer, []);
   const data = { state, dispatch };
 
@@ -82,7 +82,7 @@ export const WindowProvider: React.FC<any> = ({ children }) => {
     <WindowContext.Provider value={data}>
       {children}
 
-      {state.map((t: WindowComponentInterface) => createPortal(<WindowComponent key={t.id} toastData={t} children={t.children} />, document.body))}
+      {state.map(window => createPortal(<WindowComponent key={window.id} windowData={window} children={window.children} />, document.body))}
     </WindowContext.Provider>
   );
 };

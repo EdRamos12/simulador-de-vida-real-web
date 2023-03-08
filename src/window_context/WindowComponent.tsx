@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { REMOVE, UPDATE_POS, useWindowContext, WindowComponentInterface } from "./WindowContextAPI";
 
-export default function WindowComponent({ children, toastData }: {toastData: WindowComponentInterface, children: WindowComponentInterface['children']}) {
+export default function WindowComponent({ children, windowData }: {windowData: WindowComponentInterface, children: WindowComponentInterface['children']}) {
   const { dispatch } = useWindowContext();
   
   const [windowPosition, setWindowPosition] = useState({
-    x: toastData.pos?.x || -500,
-    y: toastData.pos?.y || -500
+    x: windowData.pos?.x || -500,
+    y: windowData.pos?.y || -500
   });
 
   const [offset, setOffset] = useState({
@@ -18,7 +18,7 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
     dispatch({
       type: UPDATE_POS,
       payload: {
-        id: toastData.id,
+        id: windowData.id,
         pos: {
           x: windowPosition.x,
           y: windowPosition.y,
@@ -41,7 +41,7 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
   }
 
   useEffect(() => {
-    const windowID = document.getElementById(toastData.id)
+    const windowID = document.getElementById(windowData.id as string)
     
     if (windowPosition.x === -500 && windowPosition.y === -500) setWindowPosition({
       x: window.innerWidth - (window.innerWidth / 2) - ((windowID?.clientWidth || 300) / 2),
@@ -61,7 +61,7 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
   return (
     <div 
       className="window active"
-      id={toastData.id}
+      id={windowData.id}
       style={{
         position: 'absolute',
         top: `${windowPosition.y - offset.y}px`,
@@ -90,8 +90,8 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
             }))
             window.addEventListener('mousemove', handleDragMove, true)
           }}
-        >{toastData.title}</div>
-        <div className="title-bar-controls" style={{
+        >{windowData.title}</div>
+        {windowData.type === 'custom' && <div className="title-bar-controls" style={{
           margin: '6px',
           marginTop: '0px',
           marginLeft: '0px',
@@ -99,13 +99,16 @@ export default function WindowComponent({ children, toastData }: {toastData: Win
           <button onClick={() => dispatch({
             type: REMOVE,
             payload: {
-              id: toastData.id
+              id: windowData.id
             }
           })} aria-label="Close" />
-        </div>
+        </div>}
       </div>
       <div className="window-body has-space">
-        {children}
+        {windowData.type === 'custom' && children}
+        {windowData.type !== 'custom' && <>
+        
+        </>}
       </div>
     </div>
   )

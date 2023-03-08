@@ -2,11 +2,12 @@ import Head from 'next/head';
 import { Inter } from '@next/font/google';
 import styles from '@/styles/Home.module.css';
 import { ADD, useWindowContext } from '@/window_context/WindowContextAPI';
+import DebugMenu from '@/game_context/components/DebugMenu';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  const { toast, dispatch } = useWindowContext();
+  const { dispatch } = useWindowContext();
 
   return (
     <>
@@ -24,7 +25,7 @@ export default function Home() {
             type: 'custom',
             title: 'pfvr funcione',
             id: 'main_window',
-            children: <div>se inscrevam-se no vanal simpson gamer</div>
+            children: <DebugMenu />
           }
         })}>nova janela</button>
         {/* <WindowComponent /> */}
