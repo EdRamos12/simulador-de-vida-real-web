@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { Inter } from '@next/font/google';
 import styles from '@/styles/Home.module.css';
 import { ADD, useWindowContext } from '@/window_context/WindowContextAPI';
-import DebugMenu from '@/game_context/components/DebugMenu';
+import GameMain from '@/game_context/components/GameMain';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,7 +25,7 @@ export default function Home() {
             type: 'custom',
             title: 'pfvr funcione',
             id: 'main_window',
-            children: <DebugMenu />
+            children: <GameMain />
           }
         })}>nova janela</button>
         {/* <WindowComponent /> */}

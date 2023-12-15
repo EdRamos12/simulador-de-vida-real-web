@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { REMOVE, UPDATE_POS, useWindowContext, WindowComponentInterface } from "./WindowContextAPI";
+import { REMOVE, UPDATE_ACTIVE, UPDATE_POS, useWindowContext, WindowButtonsType, WindowComponentInterface } from "./WindowContextAPI";
 
 export default function WindowComponent({ children, windowData }: {windowData: WindowComponentInterface, children: WindowComponentInterface['children']}) {
   const { dispatch } = useWindowContext();
+
+  const [activeButton, setActiveButton] = useState('');
   
   const [windowPosition, setWindowPosition] = useState({
     x: windowData.pos?.x || -500,
@@ -10,8 +12,8 @@ export default function WindowComponent({ children, windowData }: {windowData: W
   });
 
   const [offset, setOffset] = useState({
-    x: 0,
-    y: 0
+    x: windowData.pos?.offsetX || 0,
+    y: windowData.pos?.offsetY || 0
   })
 
   const updatePositionInContext = () => {
@@ -41,6 +43,8 @@ export default function WindowComponent({ children, windowData }: {windowData: W
   }
 
   useEffect(() => {
+
+    //window setup
     const windowID = document.getElementById(windowData.id as string)
     
     if (windowPosition.x === -500 && windowPosition.y === -500) setWindowPosition({
@@ -49,6 +53,12 @@ export default function WindowComponent({ children, windowData }: {windowData: W
     });
 
     window.addEventListener('mouseup', mouseUp);
+
+    //button priority setup
+    const listOfButtons = Array.from(document.getElementsByTagName('button'));
+    // listOfButtons.forEach(element => {
+    //   element.
+    // })
   }, [])
   
   useEffect(() => {
@@ -58,14 +68,24 @@ export default function WindowComponent({ children, windowData }: {windowData: W
     updatePositionInContext();
   }, [windowPosition, offset])
 
+  console.log(windowData.state, windowData.id)
+
   return (
     <div 
-      className="window active"
+      className={`window ${windowData.state && 'active'}`}
       id={windowData.id}
       style={{
         position: 'absolute',
         top: `${windowPosition.y - offset.y}px`,
         left:  `${windowPosition.x - offset.x}px`,
+      }}
+      onClick={() => {
+        dispatch({
+          type: UPDATE_ACTIVE,
+          payload: {
+            id: windowData.id
+          }
+        })
       }}
     >
       <div 
@@ -107,7 +127,23 @@ export default function WindowComponent({ children, windowData }: {windowData: W
       <div className="window-body has-space">
         {windowData.type === 'custom' && children}
         {windowData.type !== 'custom' && <>
-        
+          {windowData.text}
+
+          <section className="field-row" style={{
+            justifyContent: 'flex-end'
+          }}>
+            {/* <button className="default">OK</button>
+            <button>Cancel</button> */}
+            {Object.keys(windowData.buttons as WindowButtonsType).map((label, index) => {
+              return <button 
+                key={index} 
+                className={`${index === 0 && 'default'}`} 
+                onClick={() => windowData.buttons![label]()}
+              >
+                {label}
+              </button>
+            })}
+          </section>
         </>}
       </div>
     </div>

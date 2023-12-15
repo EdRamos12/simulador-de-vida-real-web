@@ -24,7 +24,7 @@ type GameContextAPIType = {
   decreaseDepression: () => boolean;
   drinkWater: () => boolean;
   sleep: () => boolean;
-  eatFood: () => boolean;
+  eatFood: (amount?: number, discount_from_storage?: boolean) => boolean;
   increaseMoney: (amount: number) => boolean;
   decreaseMoney: (amount: number) => boolean;
   increaseStrength: () => boolean;
@@ -46,6 +46,8 @@ export const GameAPIProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [money, setMoney] = useState(MONEY_INIT_VALUE);
   const [intelligence, setIntelligence] = useState(INTELLIGENCE_INIT_VALUE);
   const [depression, setDepression] = useState(DEPRESSION_INIT_VALUE);
+
+  // TODO: set list of jobs
   const [job, setJob] = useState(JOB_INIT_VALUE);
 
   // inventory?
@@ -55,7 +57,7 @@ export const GameAPIProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({
       type: ADD,
       payload: {
-        
+        // TODO: add death textbox
       }
     })
   }
@@ -116,12 +118,11 @@ export const GameAPIProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return true;
   }
 
-  const eatFood = (amount = 1) => {
-    if (hunger <= HUNGER_INIT_VALUE) return false;
-    if (foodStorage <= 0) return false;
+  const eatFood = (amount = 1, discount_from_storage = true) => {
+    if (hunger <= HUNGER_INIT_VALUE || (foodStorage <= 0 && discount_from_storage)) return false;
 
     setHunger(current => current - amount);
-    setFoodStorage(current => current - amount);
+    if (discount_from_storage) setFoodStorage(current => current - amount);
     return true;
   }
 
